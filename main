@@ -1,0 +1,100 @@
+from ttkbootstrap import Window, Label, Button, Entry, Treeview, END
+from ttkbootstrap.dialogs import Messagebox
+import datetime
+
+
+class Employee:
+    company = "Sematec"
+
+    def __init__(self, id, firstname, lastname, birthdate):
+        self.id = id
+        self.first_name = firstname
+        self.last_name = lastname
+        self.birth_date = birthdate
+
+    @property
+    def birth_date(self):
+        return self._birth_date
+
+    @birth_date.setter
+    def birth_date(self, value):
+        self._birth_date = datetime.date.fromisoformat(value)
+
+    def calculate_age(self):
+        date_now = datetime.date.today()
+        days = (date_now - self._birth_date).days
+        return round(days / 365)
+
+    def to_tuple(self):
+        return (self.first_name, self.last_name, self.birth_date, self.company)
+
+    def __str__(self):
+        return f"{self.first_name} {self.last_name} {self.calculate_age()} yo."
+
+
+employee_list = []
+
+employee_list.append(Employee(1, "Eshagh", "Aradmehr", "1980-10-10"))
+employee_list.append(Employee(2, "Shahin", "Nasiri", "1990-10-10"))
+employee_list.append(Employee(3, "Forouzan", "Naghdi", "1999-10-10"))
+employee_list.append(Employee(4, "Armin", "Yaghoubi", "1989-10-10"))
+
+window = Window(title="Employee List", themename="darkly")
+
+company_label = Label(window, text="Company")
+company_label.grid(row=0, column=0, pady=10, padx=10)
+
+company_entry = Entry(window)
+company_entry.insert(0, Employee.company)
+company_entry.grid(row=0, column=1, pady=10, padx=(0, 10), sticky="ew")
+
+
+def change_button_clicked():
+    new_company = company_entry.get()
+    Employee.company = new_company
+    load_data()
+
+
+change_button = Button(window, text="Change", command=change_button_clicked)
+change_button.grid(row=0, column=2, pady=10, padx=(0, 10))
+
+
+def show_information_button_clicked():
+    employee_id = int(table.selection()[0])
+
+    employee_selected = filter(lambda e: e.id == employee_id, employee_list)
+
+    for item in employee_selected:
+        Messagebox.show_info(title="Information", message=str(item))
+
+
+show_information_button = Button(window, text="Show Information", bootstyle="info",
+                                 command=show_information_button_clicked)
+show_information_button.grid(row=0, column=3, pady=10, padx=(0, 20))
+
+columns = ("firstname", "lastname", "birthdate", "company")
+
+table = Treeview(window, columns=columns)
+table.grid(row=1, column=1, pady=(0, 10))
+
+table.heading("#0", text="NO")
+table.heading(columns[0], text="First Name")
+table.heading(columns[1], text="Last Name")
+table.heading(columns[2], text="Birthdate")
+table.heading(columns[3], text="Company")
+
+item_list = []
+
+
+def load_data():
+    for item in item_list:
+        table.delete(item)
+    item_list.clear()
+
+    for emp in employee_list:
+        item_list.append(table.insert("", END, text=emp.id, iid=emp.id, values=emp.to_tuple()))
+
+
+load_data()
+
+window.mainloop()
